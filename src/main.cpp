@@ -1,4 +1,5 @@
 #include <sil/sil.hpp>
+#include <string>
 #include "random.hpp"
 
 //Ex 1 : Keep only the green
@@ -82,41 +83,122 @@ void rotation(sil::Image& image){
     image = new_image;
 }
 
+//Ex 9 : RGB Split
+void split(sil::Image& image){
+    int shift {30};
+
+    sil::Image new_image{image.width(), image.height()};
+
+    for (int x{0}; x < image.width(); ++x){
+        for (int y{0}; y < image.height(); ++y){
+            
+            int x_left{x + shift};
+            int x_right{x - shift};
+
+            if (x_right < 0){
+                x_right = 0;
+            }
+            if (x_left > image.width() - 1){
+                x_left = image.width() - 1;
+            }
+
+            new_image.pixel(x, y).r = image.pixel(x_right, y).r;
+            new_image.pixel(x, y).g = image.pixel(x, y).g;
+            new_image.pixel(x, y).b = image.pixel(x_left, y).b;
+            
+        }
+    }
+    image = new_image;
+}
+
+//Ex 10 : Brightness
+void brightness(sil::Image& image){
+    float const power{1.4f};
+
+    for (glm::vec3& color : image.pixels()){
+        color.r = std::pow(color.r, power);
+        color.g = std::pow(color.g, power);
+        color.b = std::pow(color.b, power);
+    }
+}
+
+//Ex 11 : Disk
+void disk(sil::Image& image){
+    int const center_x{image.width()/2};
+    int const center_y{image.height()/2};
+    int const radius{100};
+
+    for (int x{0}; x < image.width(); ++x){
+        for (int y{0}; y < image.height(); ++y){
+            int const distance_x{x - center_x};
+            int const distance_y{y - center_y};
+            int pythagoras {distance_x * distance_x + distance_y * distance_y };
+
+            if(pythagoras <= radius * radius){
+                image.pixel(x,y) = glm::vec3{1};
+            }
+        }
+    }
+}
+
+//Ex 12 : Circle
+void circle(sil::Image& image){
+    int const center_x{image.width()/2};
+    int const center_y{image.height()/2};
+    int const radius{100};
+
+    int const thickness {10};
+
+    for (int x{0}; x < image.width(); ++x){
+        for (int y{0}; y < image.height(); ++y){
+            int const distance_x{x - center_x};
+            int const distance_y{y - center_y};
+
+            int pythagoras {distance_x * distance_x + distance_y * distance_y };
+            int radius_pythagoras {radius * radius};
+
+            int radius_thickness {(radius - thickness) * (radius - thickness)};
+
+            if(pythagoras <= radius_pythagoras
+                && pythagoras >= radius_thickness){
+                image.pixel(x,y) = glm::vec3{1};
+            }
+        }
+    }
+}
+
+//Ex 13 : Animation
+void animation(){
+    int num{0};
+
+    for(int center_x{}; center_x < 500; center_x=center_x+40){
+        sil::Image image{500, 500};
+
+        int const center_y{image.height()/2};
+        int const radius{100};
+
+        for (int x{0}; x < image.width(); ++x){
+            for (int y{0}; y < image.height(); ++y){
+                int const distance_x{x - center_x};
+                int const distance_y{y - center_y};
+                int pythagoras {distance_x * distance_x + distance_y * distance_y };
+
+                if(pythagoras <= radius * radius){
+                    image.pixel(x,y) = glm::vec3{1};
+                }
+            }
+        }
+        image.save("output/ex13_" + std::to_string(num) + ".png");
+
+        num = num+1;
+    }
+}
+
 
 
 int main(){
-    sil::Image image{"images/logo.png"};
+    // sil::Image image{"images/logo.png"};
+    // sil::Image image{"images/photo.jpg"};
 
-    //Ex 1
-    // only_green(image);
-    // image.save("output/ex1_test1.png");
-    
-    //Ex 2
-    // change_channels(image);
-    // image.save("output/ex2_test1.png");
-
-    //Ex 3
-    // black_white(image);
-    // image.save("output/ex3_test1.png");
-
-    //Ex 4
-    // negative(image);
-    // image.save("output/ex4_test2.png");
-
-    //Ex 5
-    // sil::Image image{300, 200};
-    // gradient(image);
-    // image.save("output/ex5_test1.png");
-
-    //Ex 6
-    // mirror(image);
-    // image.save("output/ex6_test1.png");
-
-    //Ex 7
-    // noise(image);
-    // image.save("output/ex7_test1.png");
-
-    //Ex 8
-    rotation(image);
-    image.save("output/ex8_test1.png");
+    animation();
 }
