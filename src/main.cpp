@@ -194,11 +194,99 @@ void animation(){
     }
 }
 
+//Ex 14 : Rosette
+void rosette(sil::Image& image){
+    int const image_center_x{image.width()/2};
+    int const image_center_y{image.height()/2};
+    int const radius{100};
+    int const thickness {10};
+
+    for(int num{0}; num <= 6; ++num){
+        int circle_x{image_center_x};
+        int circle_y{image_center_y};
+
+        if (num > 0){
+            float const angle{num*2.f*3.14159f/6.f};
+            circle_x = image_center_x + radius * std::cos(angle);
+            circle_y = image_center_y + radius * std::sin(angle);
+        }
+
+        for (int x{0}; x < image.width(); ++x){
+            for (int y{0}; y < image.height(); ++y){
+                int const distance_x{x - circle_x};
+                int const distance_y{y - circle_y};
+
+                int const pythagoras{distance_x * distance_x + distance_y * distance_y};
+                int const radius_pythagoras{radius * radius};
+                int const radius_thickness{(radius - thickness) * (radius - thickness)};
+
+                if (pythagoras <= radius_pythagoras
+                    && pythagoras >= radius_thickness){
+                    image.pixel(x, y) = glm::vec3{1};
+                }
+            }
+        }
+    }
+}
+
+//Ex 15 : Mosaic
+void mosaic(sil::Image& image){
+    sil::Image new_image{image.width(), image.height()};
+    int const copy{5};
+
+    for (int x{0}; x < image.width(); ++x){
+        for (int y{0}; y < image.height(); ++y){
+            int const source_x{
+                (x * copy) % image.width()
+            };
+            int const source_y{
+                (y * copy) % image.height()
+            };
+
+            new_image.pixel(x, y) = image.pixel(source_x, source_y);
+        }
+    }
+    image = new_image;
+}
+
+//Ex 17 : Glitch
+void glitch(sil::Image& image){
+    for (int n{0}; n < 70; ++n){
+        int width{
+            random_int(5, 50)
+        };
+        int height{
+            random_int(1, 10)
+        };
+
+        int ax{
+            random_int(0, image.width() - width)
+        };
+        int ay{
+            random_int(0, image.height() - height)
+        };
+        int bx{
+            random_int(0, image.width() - width)
+        };
+        int by{
+            random_int(0, image.height() - height)
+        };
+
+        for (int i{0}; i < width; ++i){
+            for (int j{0}; j < height; ++j){
+                std::swap(image.pixel(ax + i, ay + j), image.pixel(bx + i, by + j));
+            }
+        }
+    }
+}
 
 
 int main(){
-    // sil::Image image{"images/logo.png"};
+    sil::Image image{"images/logo.png"};
     // sil::Image image{"images/photo.jpg"};
 
-    animation();
+    set_random_seed(0);
+
+    glitch(image);
+    image.save("output/ex17_test1.png");
 }
