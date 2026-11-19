@@ -280,13 +280,58 @@ void glitch(sil::Image& image){
     }
 }
 
+//Ex 18 : Sort pixels
+float sort_brightness(glm::vec3 const& color){
+    return 0.299f * color.r + 0.587f * color.g + 0.114f * color.b;
+}
+//Num 1
+void sort_all_pixels(sil::Image& image){
+    std::sort(
+        image.pixels().begin(),
+        image.pixels().end(),
+        [](glm::vec3 const& color1, glm::vec3 const& color2){
+            return sort_brightness(color1) < sort_brightness(color2);
+        }
+    );
+}
+//Num 2
+void sort_lines_pixel(sil::Image& image){
+    for (int y{0}; y < image.height(); ++y){
+        std::sort(
+            image.pixels().begin() + y * image.width(),
+            image.pixels().begin() + (y + 1) * image.width(),
+            [](glm::vec3 const& color1, glm::vec3 const& color2){
+                return sort_brightness(color1) < sort_brightness(color2);
+            }
+        );
+    }
+}
+//Num 3
+void sort_random_pixel(sil::Image& image){
+    for (int y{0}; y < image.height(); ++y){
+        int const start{
+            random_int(0, (image.width() - 1))
+        };
+        int const end{
+            random_int(start, (image.width()))
+        };
+
+        std::sort(
+            image.pixels().begin() + y * image.width() + start,
+            image.pixels().begin() + y * image.width() + end,
+            [](glm::vec3 const& color1, glm::vec3 const& color2){
+                return sort_brightness(color1) < sort_brightness(color2);
+            }
+        );
+    }
+}
+
+
 
 int main(){
     sil::Image image{"images/logo.png"};
     // sil::Image image{"images/photo.jpg"};
 
-    set_random_seed(0);
-
-    glitch(image);
-    image.save("output/ex17_test1.png");
+    sort_random_pixel(image);
+    image.save("output/ex18_num3.png");
 }
