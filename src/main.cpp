@@ -1,6 +1,8 @@
 #include <sil/sil.hpp>
 #include <string>
 #include "random.hpp"
+#include <glm/gtx/matrix_transform_2d.hpp>
+#include <complex>
 
 //Ex 1 : Keep only the green
 void only_green(sil::Image& image){
@@ -249,7 +251,7 @@ void mosaic(sil::Image& image){
     image = new_image;
 }
 
-//Ex 17 : Glitch
+//Ex 16 : Glitch
 void glitch(sil::Image& image){
     for (int n{0}; n < 70; ++n){
         int width{
@@ -280,7 +282,7 @@ void glitch(sil::Image& image){
     }
 }
 
-//Ex 18 : Sort pixels
+//Ex 17 : Sort pixels
 float sort_brightness(glm::vec3 const& color){
     return 0.299f * color.r + 0.587f * color.g + 0.114f * color.b;
 }
@@ -326,12 +328,44 @@ void sort_random_pixel(sil::Image& image){
     }
 }
 
+//Ex 18 : Fractal
+void fractal(sil::Image& image){
+    sil::Image new_image{image.width(), image.height()};
+    int const max_iterations{50};
+
+    for (int x{0}; x < image.width(); ++x){
+        for (int y{0}; y < image.height(); ++y){
+            std::complex<float> c{
+                (static_cast<float>(x) / image.width() - 0.5f)*2.5f - 0.6f,
+                (static_cast<float>(y) / image.height() - 0.5f)*2.5f
+            };
+            std::complex<float> z{0.f, 0.f};
+
+            bool in_fractal{true};
+
+            for (int i{0}; i < max_iterations; ++i){
+                z = z * z + c;
+                if (std::abs(z) > 2){
+                    in_fractal = false;
+                    break;
+                }
+            }
+
+            if (in_fractal){
+                new_image.pixel(x,y) = glm::vec3{1};
+            }
+        }
+    }
+    image = new_image;
+}
+
 
 
 int main(){
-    sil::Image image{"images/logo.png"};
+    // sil::Image image{"images/logo.png"};
     // sil::Image image{"images/photo.jpg"};
 
-    sort_random_pixel(image);
-    image.save("output/ex18_num3.png");
+    sil::Image image{500, 500};
+    fractal(image);
+    image.save("output/ex18_test1.png");
 }
